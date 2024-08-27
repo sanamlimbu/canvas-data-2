@@ -64,7 +64,6 @@ dap_client_id = os.environ.get("DAP_CLIENT_ID")
 dap_client_secret = os.environ.get("DAP_CLIENT_SECRET")
 db_connection_string = os.environ.get("DAP_CONNECTION_STRING")
 tables = os.environ.get("TABLES").split(",")
-sns_topic_arn = os.environ.get("SNS_TOPIC_ARN")
 
 namespace = "canvas"
 
