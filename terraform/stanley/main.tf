@@ -82,10 +82,17 @@ resource "aws_sns_topic" "canvas_data_2_sync_results" {
   name = "${local.service_name}-sync-results"
 }
 
-resource "aws_sns_topic_subscription" "canvas_data_2_sync_results_email" {
-  topic_arn = aws_sns_topic.canvas_data_2_sync_results.arn
-  protocol  = "email"
-  endpoint  = var.subscription_email
+resource "aws_sns_topic_subscription" "sanam_stanley_email" {
+  depends_on = [aws_sns_topic.canvas_data_2_sync_results]
+  topic_arn  = aws_sns_topic.canvas_data_2_sync_results.arn
+  protocol   = "email"
+  endpoint   = "sanam.limbu@stanleycollege.edu.au"
+}
+resource "aws_sns_topic_subscription" "arun_stanley_email" {
+  depends_on = [aws_sns_topic.canvas_data_2_sync_results]
+  topic_arn  = aws_sns_topic.canvas_data_2_sync_results.arn
+  protocol   = "email"
+  endpoint   = "arun.limbu@stanleycollege.edu.au"
 }
 
 resource "aws_lambda_function" "function" {

@@ -52,7 +52,3 @@ variable "tables" {
   type        = string
 }
 
-variable "subscription_email" {
-  description = "Email subscribing SNS topic."
-  type        = string
-}
