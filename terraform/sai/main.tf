@@ -51,6 +51,21 @@ resource "aws_s3_bucket_versioning" "versioning" {
   }
 }
 
+resource "aws_s3_bucket_lifecycle_configuration" "versioning-bucket-config" {
+  depends_on = [aws_s3_bucket_versioning.versioning]
+
+  bucket = aws_s3_bucket.lambda_bucket.id
+
+  rule {
+    status = "Enabled"
+    id     = "delete_previous_versions"
+
+    noncurrent_version_expiration {
+      noncurrent_days = 5
+    }
+  }
+}
+
 resource "aws_s3_bucket_ownership_controls" "lambda_bucket_ownership_controls" {
   bucket = aws_s3_bucket.lambda_bucket.id
   rule {
