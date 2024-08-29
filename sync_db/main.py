@@ -44,7 +44,9 @@ def lambda_handler(event, context: LambdaContext):
 
     results = loop.run_until_complete(main(credentials=credentials))
 
-    message = f"{results}"
+    log_stream_name = context.log_stream_name
+
+    message = f"Results: {results}\n\nLog Stream: {log_stream_name}"
 
     response = client.publish(
         TopicArn=sns_topic_arn,
