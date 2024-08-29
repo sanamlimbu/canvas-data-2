@@ -1,6 +1,7 @@
 import asyncio
 import os
 import sys
+from datetime import datetime
 from enum import StrEnum
 
 from dap.api import DAPClient
@@ -9,19 +10,6 @@ from dap.integration.database import DatabaseConnection
 from dap.integration.database_errors import NonExistingTableError
 from dap.replicator.sql import SQLReplicator
 from dotenv import load_dotenv
-
-
-class SyncTableResult(StrEnum):
-    INIT_NEEDED = "init_needed"
-    COMPLETED = "completed"
-    FAILED = "failed"
-    NO_TABLE = "no_table"
-
-
-class InitTableResult(StrEnum):
-    COMPLETED = "completed"
-    FAILED = "failed"
-
 
 if len(sys.argv) < 2:
     print(
@@ -54,11 +42,6 @@ class SyncTableResult(StrEnum):
     NO_TABLE = "no_table"
 
 
-class InitTableResult(StrEnum):
-    COMPLETED = "completed"
-    FAILED = "failed"
-
-
 base_url = os.environ.get("DAP_API_URL")
 dap_client_id = os.environ.get("DAP_CLIENT_ID")
 dap_client_secret = os.environ.get("DAP_CLIENT_SECRET")
@@ -78,77 +61,38 @@ def main():
         else:
             raise
 
-    results = loop.run_until_complete(async_main())
-
-    print(results)
+    loop.run_until_complete(async_main())
 
 
 async def async_main():
+    start_time = datetime.now()
+    print(f"sync db started at: {start_time}")
+
+    credentials = Credentials.create(
+        client_id=dap_client_id, client_secret=dap_client_secret
+    )
+
     tasks = [
-        sync_or_init_table(
-            table_name=table_name,
-        )
+        sync_table(table_name=table_name, credentials=credentials)
         for table_name in tables
     ]
 
-    results = await asyncio.gather(*tasks)
+    await asyncio.gather(*tasks)
 
-    formatted_results = [
-        {"Table": result["table_name"], "Result": result["result"].value}
-        for result in results
-    ]
-
-    return formatted_results
+    end_time = datetime.now()
+    print(f"sync db finished at: {end_time}")
 
 
-async def sync_or_init_table(table_name: str):
-    result = await sync_table(table_name=table_name)
+async def sync_table(table_name: str, credentials: Credentials):
+    print(f"sync table: {table_name} started...")
 
-    if result == SyncTableResult.INIT_NEEDED:
-        result = await init_table(table_name=table_name)
+    db_connection = DatabaseConnection(connection_string=db_connection_string)
 
-        print(f"{result} init table: {table_name}")
-
-    else:
-        print(f"{result} sync table: {table_name}")
-
-    return {"table_name": table_name, "result": result}
-
-
-async def init_table(table_name: str):
-    result = InitTableResult.COMPLETED
-
-    credentials = Credentials.create(
-        client_id=dap_client_id, client_secret=dap_client_secret
-    )
-
-    connection = DatabaseConnection(connection_string=db_connection_string)
-
-    try:
-        async with DAPClient(base_url=base_url, credentials=credentials) as session:
-            await SQLReplicator(session=session, connection=connection).initialize(
-                namespace=namespace, table_name=table_name
-            )
-
-    except Exception as e:
-        print(f"{table_name} init_table exception: {e}")
-        result = InitTableResult.FAILED
-
-    return result
-
-
-async def sync_table(table_name: str):
     result = SyncTableResult.COMPLETED
 
-    credentials = Credentials.create(
-        client_id=dap_client_id, client_secret=dap_client_secret
-    )
-
-    connection = DatabaseConnection(connection_string=db_connection_string)
-
     try:
         async with DAPClient(base_url=base_url, credentials=credentials) as session:
-            await SQLReplicator(session=session, connection=connection).synchronize(
+            await SQLReplicator(session=session, connection=db_connection).synchronize(
                 namespace=namespace, table_name=table_name
             )
 
@@ -160,8 +104,10 @@ async def sync_table(table_name: str):
             result = SyncTableResult.INIT_NEEDED
 
     except Exception as e:
-        print(f"{table_name} sync_table exception: {e}")
+        print(f"{table_name} sync table exception: {e}")
         result = SyncTableResult.FAILED
+
+    print(f"sync table: {table_name}, result: {result}")
 
     return result
 

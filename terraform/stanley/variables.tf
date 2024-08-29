@@ -10,17 +10,6 @@ variable "stage_name" {
   default     = "prod"
 }
 
-
-variable "aws_access_key" {
-  description = "AWS access key."
-  type        = string
-}
-
-variable "aws_secret_key" {
-  description = "AWS secret key."
-  type        = string
-}
-
 variable "python_runtime" {
   description = "Python runtime e.g python3.12."
   type        = string

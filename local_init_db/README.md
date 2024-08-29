@@ -1,4 +1,4 @@
-# Canvas Data 2 Sync From Local Device
+# Canvas Data 2 Initialize From Local Device
 
 Synchronize Canvas Data 2 from a local device to your choice of database.
 
