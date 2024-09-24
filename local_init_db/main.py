@@ -43,7 +43,7 @@ base_url = os.environ.get("DAP_API_URL")
 dap_client_id = os.environ.get("DAP_CLIENT_ID")
 dap_client_secret = os.environ.get("DAP_CLIENT_SECRET")
 db_connection_string = os.environ.get("DAP_CONNECTION_STRING")
-tables = os.environ.get("TABLES").split(",")
+skip_tables = os.environ.get("SKIP_TABLES").split(",")
 
 namespace = "canvas"
 
@@ -57,6 +57,12 @@ async def main():
     )
 
     db_connection = DatabaseConnection(connection_string=db_connection_string)
+
+    all_tables = await get_tables(
+        api_base_url=base_url, credentials=credentials, namespace=namespace
+    )
+
+    tables = [t for t in all_tables if t not in skip_tables]
 
     for table_name in tables:
         print(f"init table: {table_name} started...")
@@ -87,6 +93,14 @@ async def init_table(
         result = InitTableResult.FAILED
 
     return result
+
+
+async def get_tables(api_base_url: str, credentials: Credentials, namespace: str):
+    async with DAPClient(
+        base_url=api_base_url,
+        credentials=credentials,
+    ) as session:
+        return await session.get_tables(namespace)
 
 
 asyncio.run(main())
