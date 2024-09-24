@@ -1,6 +1,6 @@
 # Canvas Data 2 Sync Workflow
 
-Synchronize Canvas Data 2 using AWS Lambda to Supabase. Lambda function folder is `sync_db`.
+Synchronize Canvas Data 2 using AWS Lambda to Supabase. Lambda function folder is `sync_tables`.
 
 # Initialize
 
@@ -8,7 +8,7 @@ Make sure to initialize tables before synchronizing. To initialize go to `local_
 
 ## Dependencies
 
-The project uses the dependencies listed in the `requirements.txt` file of `sync_db` folder.
+The project uses the dependencies listed in the `requirements.txt` file of `sync_tables` folder.
 
 ```
 aws-lambda-powertools==2.34.2

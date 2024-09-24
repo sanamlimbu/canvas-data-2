@@ -3,7 +3,7 @@ set -e
 
 echo "Starting to package AWS Lambda Function (Python)."
 
-source_path="../../sync_db"
+source_path="../../sync_tables"
 packages_dir="tf_generated/packages"
 runtime="python3.12"
 venv="venv"
